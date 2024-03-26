@@ -1,0 +1,31 @@
+;Tarea 2
+;Yherland Elizondo Cordero
+;Gabriela Quesada Sancho
+;Jafet Dixon Solano
+
+#lang racket
+(require racket/gui/base)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Main Window;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define mainWindow (new frame% [label "BlaCEJack"]
+                        [width 1100]
+                        [height 550]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Window layout section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define mainPanel (new horizontal-panel% [parent mainWindow]))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: canvas section;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;function to refresh the canvas
+(define (paint-callback canvas dc)
+  (+ 1 1)
+ )
+
+;canvas definition
+(define canvas (new canvas% [parent mainPanel]
+                    [style (list 'border)]
+                    [paint-callback paint-callback]
+                    ))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;show the frame;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(send mainWindow show #t)
