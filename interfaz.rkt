@@ -52,18 +52,52 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: canvas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;function to refresh the canvas
-(define (paint-callback canvas dc)
-  (send dc set-background "green")
+
+;functions to refresh each canvas
+
+(define (paint-callback0 canvas dc)
+  (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
-  (draw-lines canvas)
  )
 
-;canvas definition
-(define canvas (new canvas% [parent player2Panel]
+(define (paint-callback1 canvas dc)
+  (send dc set-background (make-object color% 58 170 63))
+  (send dc clear)
+ )
+
+(define (paint-callback2 canvas dc)
+  (send dc set-background (make-object color% 58 170 63))
+  (send dc clear)
+ )
+
+(define (paint-callback3 canvas dc)
+  (send dc set-background (make-object color% 58 170 63))
+  (send dc clear)
+ )
+
+;dealer canvas definition
+(define dealerCanvas (new canvas% [parent upperPanel]
                     [style (list 'border)]
-                    [paint-callback paint-callback]
+                    [paint-callback paint-callback0]
                     ))
+
+;player 1 canvas definition
+(define player1Canvas (new canvas% [parent player1Panel]
+                    [style (list 'border)]
+                    [paint-callback paint-callback1]
+                    ))
+
+;player 2 canvas definition
+(define player2Canvas (new canvas% [parent player2Panel]
+                    [style (list 'border)]
+                    [paint-callback paint-callback2]
+                    ))
+
+;player 3 canvas definition
+(define player3Canvas (new canvas% [parent player3Panel]
+                    [style (list 'border)]
+                    [paint-callback paint-callback3]
+                    ))                    
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;show the frame;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (send mainWindow show #t)
