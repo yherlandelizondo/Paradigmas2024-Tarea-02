@@ -16,6 +16,10 @@
 (define player2Deck '())
 (define player3Deck '())
 (define cont 1)
+(define dealerScore 0)
+(define player1Score 0)
+(define player2Score 0)
+(define player3Score 0)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;funciones especifica;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (print list) ;funcion para imprimir una lista
@@ -90,7 +94,7 @@
   (send selecWindow show #f))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;creacion de las 4 decks;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;creacion de las 4 decks iniciales;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (initializeDecks)
   (cond ((< cont 3) (deckAuxiliar (cons (car randomDeck) dealerDeck)))
         ((< cont 5) (deckAuxiliar (cons (car randomDeck) player1Deck)))
@@ -99,6 +103,7 @@
           )
 )
 
+;printprintprintprintprintprintprintprintprintprintprintprintprintprintprintprintprintprintprint
 (define (printAux)
   (print dealerDeck)
   (print player1Deck)
@@ -106,12 +111,15 @@
   (print player3Deck))
 
 (define (deckAuxiliar newDeck)
-  (set! randomDeck (cdr randomDeck))
-  (cond ((< cont 3) (set! dealerDeck newDeck))
+  (cond ((< cont 3) (begin 
+                          (set! dealerDeck newDeck)
+                          ;(set! dealerScore (+ (car randomDeck) ))
+  ))
         ((< cont 5) (set! player1Deck newDeck))
         ((< cont 7) (set! player2Deck newDeck))
         (else (set! player3Deck newDeck)))
   (set! cont (+ cont 1))
+  (set! randomDeck (cdr randomDeck))
   (cond ((< cont 9) (initializeDecks))
         (else (printAux)))
 )
@@ -152,7 +160,7 @@
                         [min-width 300]
                         [min-height 520]
                         ))                     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: Lineas divisoras;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: cartas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (draw-cards canvas)
   (define dc (send canvas get-dc))
   (send dc set-text-foreground "black")
