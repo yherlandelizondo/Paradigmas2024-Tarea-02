@@ -131,7 +131,7 @@
 
 (define mainWindow (new frame% [label "BlaCEJack"]
                         [width 900]
-                        [height 700]))
+                        [height 670]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Disposicion de la pantalla;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define mainPanel (new vertical-panel% [parent mainWindow])) ;panel principal
@@ -143,22 +143,22 @@
 
 (define lowerPanel (new horizontal-panel% [parent mainPanel] ;panel inferior
                         [min-width 900]
-                        [min-height 420]
+                        [min-height 390]
                         ))
 
 (define player1Panel (new vertical-panel% [parent lowerPanel] ; panel para jugador 1
                         [min-width 300]
-                        [min-height 420]
+                        [min-height 390]
                         ))
 
 (define player2Panel (new vertical-panel% [parent lowerPanel] ; panel para jugador 2
                         [min-width 300]
-                        [min-height 420]
+                        [min-height 390]
                         ))
 
 (define player3Panel (new vertical-panel% [parent lowerPanel] ; panel para jugador 3
                         [min-width 300]
-                        [min-height 420]
+                        [min-height 390]
                         ))  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: cartas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
