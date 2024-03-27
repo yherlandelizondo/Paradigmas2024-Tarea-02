@@ -5,8 +5,22 @@
 
 #lang racket
 (require racket/gui/base)
+(require math)
+(require "lib/randomDeck.rkt")
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Variables y constantes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define players 0)
+(define randomDeck (randomList))
+(define dealerDeck '())
+(define player1Deck '())
+(define player2Deck '())
+(define player3Deck '())
+(define cont 1)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;funciones especifica;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (print list) ;funcion para imprimir una lista
+  (for-each display list)
+  (newline))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Selec Window;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -14,13 +28,11 @@
                         [width 550]
                         [height 300]))
 
-
 (define selecPanel (new horizontal-panel% [parent selecWindow]))
 (define leftPanel (new vertical-panel% [parent selecPanel]
                        [min-width 150]
                        [min-height 300]
                        ))
-
 
 (define space1 (new message% [parent leftPanel]
                            [label " "]))
@@ -59,34 +71,59 @@
                          [callback (lambda (button event)
                                      (threePButtonCallback event))]))
 
-
-
-
 (define (onePButtonCallback event)
   (set! players 1)
+  (initializeDecks)
   (send mainWindow show #t)
   (send selecWindow show #f))
 
 (define (twoPButtonCallback event)
   (set! players 2)
+  (initializeDecks)
   (send mainWindow show #t)
   (send selecWindow show #f))
 
 (define (threePButtonCallback event)
   (set! players 3)
+  (initializeDecks)
   (send mainWindow show #t)
   (send selecWindow show #f))
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;creacion de las 4 decks;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (initializeDecks)
+  (cond ((< cont 3) (deckAuxiliar (cons (car randomDeck) dealerDeck)))
+        ((< cont 5) (deckAuxiliar (cons (car randomDeck) player1Deck)))
+        ((< cont 7) (deckAuxiliar (cons (car randomDeck) player2Deck)))
+        (else (deckAuxiliar (cons (car randomDeck) player3Deck)))
+          )
+)
+
+(define (printAux)
+  (print dealerDeck)
+  (print player1Deck)
+  (print player2Deck)
+  (print player3Deck))
+
+(define (deckAuxiliar newDeck)
+  (set! randomDeck (cdr randomDeck))
+  (cond ((< cont 3) (set! dealerDeck newDeck))
+        ((< cont 5) (set! player1Deck newDeck))
+        ((< cont 7) (set! player2Deck newDeck))
+        (else (set! player3Deck newDeck)))
+  (set! cont (+ cont 1))
+  (cond ((< cont 9) (initializeDecks))
+        (else (printAux)))
+)
+  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;show the selec frame;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (send selecWindow show #t)
 
-;*******************************************************************************************************************************************************
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Pantalla principal;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define mainWindow (new frame% [label "BlaCEJack"]
                         [width 900]
-                        [height 700]))
+                        [height 800]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Disposicion de la pantalla;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define mainPanel (new vertical-panel% [parent mainWindow])) ;panel principal
@@ -98,34 +135,32 @@
 
 (define lowerPanel (new horizontal-panel% [parent mainPanel] ;panel inferior
                         [min-width 900]
-                        [min-height 420]
+                        [min-height 520]
                         ))
 
 (define player1Panel (new vertical-panel% [parent lowerPanel] ; panel para jugador 1
                         [min-width 300]
-                        [min-height 420]
+                        [min-height 520]
                         ))
 
 (define player2Panel (new vertical-panel% [parent lowerPanel] ; panel para jugador 2
                         [min-width 300]
-                        [min-height 420]
+                        [min-height 520]
                         ))
 
 (define player3Panel (new vertical-panel% [parent lowerPanel] ; panel para jugador 3
                         [min-width 300]
-                        [min-height 420]
+                        [min-height 520]
                         ))                     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: Lineas divisoras;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (draw-lines canvas)
+(define (draw-cards canvas)
   (define dc (send canvas get-dc))
-  (send dc set-pen "black" 2 'solid)
-  (send dc draw-line 0 280 900 280) ; División horizontal
-  
-  ; Dibujar líneas verticales en la sección de abajo
-  (send dc draw-line 300 280 300 700)  ; División vertical 1
-  (send dc draw-line 600 280 600 700) ; División vertical 2
+  (send dc set-text-foreground "black")
+  (send dc set-font (make-object font% 14 'default 'normal 'normal))
+  (send dc draw-rectangle 50 50 100 150) ; ejemplo de carta
+  (send dc draw-text "A" 60 60) ; texto de ejemplo en la carta
+  ; Aquí puedes dibujar las demás cartas y sus posiciones
   )
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: canvas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -134,6 +169,7 @@
 (define (paint-callback0 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
+  
  )
 
 (define (paint-callback1 canvas dc)
@@ -149,6 +185,7 @@
 (define (paint-callback3 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
+  (draw-cards canvas)
  )
 
 ;dealer canvas definition
@@ -175,5 +212,37 @@
                     [paint-callback paint-callback3]
                     ))                    
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;show the frame;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(send mainWindow show #f); esto lo puse en false ******************************************************************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Buttons for decisions;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define hit1 (new button% [parent player1Panel]
+                         [label "Pedir"]
+                         [callback (lambda (button event)
+                                     (paint-callback1)
+                                     (twoPButtonCallback event))]))
+
+(define stand1 (new button% [parent player1Panel]
+                         [label "Plantarse"]
+                         [callback (lambda (button event)
+                                     (threePButtonCallback event))]))
+
+(define hit2 (new button% [parent player2Panel]
+                         [label "Pedir"]
+                         [callback (lambda (button event)
+                                     (twoPButtonCallback event))]))
+
+(define stand2 (new button% [parent player2Panel]
+                         [label "Plantarse"]
+                         [callback (lambda (button event)
+                                     (threePButtonCallback event))]))
+
+(define hit3 (new button% [parent player3Panel]
+                         [label "Pedir"]
+                         [callback (lambda (button event)
+                                     (twoPButtonCallback event))]))
+
+(define stand3 (new button% [parent player3Panel]
+                         [label "Plantarse"]
+                         [callback (lambda (button event)
+                                     (threePButtonCallback event))]))  
+
+                                                                        
