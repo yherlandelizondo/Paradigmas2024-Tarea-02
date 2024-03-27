@@ -1,10 +1,10 @@
 #lang racket
 (require math)
 
-(define deck '(A A A A 
-              K K K K 
-              Q Q Q Q 
-              J J J J
+(define deck '((A 03) (A 04) (A 05) (A 06)
+              (K 03) (K 04) (K 05) (K 06)
+              (Q 03) (Q 04) (Q 05) (Q 06) 
+              (J 03) (J 04) (J 05) (J 06)
               (2 03) (2 04) (2 05) (2 06)
               (3 03) (3 04) (3 05) (3 06)
               (4 03) (4 04) (4 05) (4 06)
