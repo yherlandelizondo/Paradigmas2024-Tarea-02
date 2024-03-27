@@ -167,7 +167,6 @@
   (send dc set-font (make-object font% 14 'default 'normal 'normal))
   (send dc draw-rectangle 50 50 100 150) ; ejemplo de carta
   (send dc draw-text "A" 60 60) ; texto de ejemplo en la carta
-  ; Aquí puedes dibujar las demás cartas y sus posiciones
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: canvas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
