@@ -7,6 +7,7 @@
 (require racket/gui/base)
 (require math)
 (require "lib/randomDeck.rkt")
+(require "lib/readWrite.rkt")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Variables y constantes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define players 0)
@@ -20,8 +21,18 @@
 (define player1Score 0)
 (define player2Score 0)
 (define player3Score 0)
+(define tempA 0)
+
+
+
+;(define listaArchivo (readFile "C:/Users/NOS/Documents/1....Works/Paradigmas2024-Tarea-02/temp/temp.txt"))
+;(newline)
+;(display (car listaArchivo))
+;(newline)
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;funciones especifica;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define (print list) ;funcion para imprimir una lista
   (for-each display list)
   (newline))
@@ -110,18 +121,83 @@
   (print player2Deck)
   (print player3Deck))
 
+;Ventana para valor de A******************************************************
+(define aWindow (new frame% [label "Valor de A"]
+                        [width 550]
+                        [height 300]))
+
+(define aPanel (new horizontal-panel% [parent aWindow]))
+(define leftaPanel (new vertical-panel% [parent aPanel]
+                       [min-width 150]
+                       [min-height 300]
+                       ))
+
+(define spac1 (new message% [parent leftaPanel]
+                           [label " "]))
+
+(define spac2 (new message% [parent leftaPanel]
+                           [label " "]))
+
+(define spac3 (new message% [parent leftaPanel]
+                           [label " "]))
+(define selecMessage (new message% [parent leftaPanel]
+                           [label "Que valor desea darle a su carta A"]))
+
+(define spac4 (new message% [parent leftaPanel]
+                           [label " "]))
+
+(define spac5 (new message% [parent leftaPanel]
+                           [label " "]))
+(define spac6 (new message% [parent leftaPanel]
+                           [label " "]))
+
+(define oneAButton (new button% [parent leftaPanel]
+                           [label "   1   "]
+                           [callback (lambda (button event)
+                                       (oneAButtonCallback event))]))
+
+(define elevenAButton (new button% [parent leftaPanel]
+                         [label "   11   "]
+                         [callback (lambda (button event)
+                                     (elevenAButtonCallback event))]))
+
+(define (oneAButtonCallback event)
+  (set! tempA 1)
+  (send aWindow show #f))
+
+(define (elevenAButtonCallback event)
+  (set! tempA 11)
+  (send aWindow show #f))
+;Verificación del puntaje total***********************************************
+
+(define (veriChara character)
+  (cond ((equal? 'J character)10)
+        ((equal? 'Q character)10)
+        ((equal? 'K character)10)
+        ((equal? 'A character)(begin
+                               (send aWindow show #t)
+                               (veriChara tempA)))
+        (else character)))
+
 (define (deckAuxiliar newDeck)
   (cond ((< cont 3) (begin 
                           (set! dealerDeck newDeck)
-                          ;(set! dealerScore (+ (car randomDeck) ))
-  ))
-        ((< cont 5) (set! player1Deck newDeck))
-        ((< cont 7) (set! player2Deck newDeck))
-        (else (set! player3Deck newDeck)))
+                          (set! dealerScore (+ dealerScore (veriChara (caar randomDeck))))))
+        ((< cont 5) (begin
+                      (set! player1Deck newDeck)
+                      (set! player1Score (+ player1Score(veriChara (caar randomDeck))))))
+        ((< cont 7) (begin
+                      (set! player2Deck newDeck)
+                      (set! player2Score (+ player2Score (veriChara (caar randomDeck))))))
+        
+        (else (begin
+                (set! player3Deck newDeck)
+                (set! player3Score (+ player3Score(veriChara (caar randomDeck)))))))
+  
   (set! cont (+ cont 1))
   (set! randomDeck (cdr randomDeck))
   (cond ((< cont 9) (initializeDecks))
-        (else (printAux)))
+        (else (printAux)))
 )
   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;show the selec frame;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -130,34 +206,34 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Pantalla principal;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define mainWindow (new frame% [label "BlaCEJack"]
-                        [width 900]
+                        [width 1050]
                         [height 670]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Disposicion de la pantalla;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define mainPanel (new vertical-panel% [parent mainWindow])) ;panel principal
 
 (define upperPanel (new horizontal-panel% [parent mainPanel] ;panel superior 
-                       [min-width 900] 
+                       [min-width 1050] 
                        [min-height 280]                     
                        ))
 
 (define lowerPanel (new horizontal-panel% [parent mainPanel] ;panel inferior
-                        [min-width 900]
+                        [min-width 1050]
                         [min-height 390]
                         ))
 
 (define player1Panel (new vertical-panel% [parent lowerPanel] ; panel para jugador 1
-                        [min-width 300]
+                        [min-width 350]
                         [min-height 390]
                         ))
 
 (define player2Panel (new vertical-panel% [parent lowerPanel] ; panel para jugador 2
-                        [min-width 300]
+                        [min-width 350]
                         [min-height 390]
                         ))
 
 (define player3Panel (new vertical-panel% [parent lowerPanel] ; panel para jugador 3
-                        [min-width 300]
+                        [min-width 350]
                         [min-height 390]
                         ))  
 
@@ -166,8 +242,15 @@
   (define dc (send canvas get-dc))
   (send dc set-text-foreground "black")
   (send dc set-font (make-object font% 14 'default 'normal 'normal))
-  (send dc draw-rectangle 50 50 100 150) ; ejemplo de carta
-  (send dc draw-text "A" 60 60) ; texto de ejemplo en la carta
+
+  (send dc draw-rectangle 15 40 96 112) ; dibujando una carta
+  (send dc draw-rectangle 126 40 96 112) ; dibujando una carta
+  (send dc draw-rectangle 237 40 96 112) ; dibujando una carta
+
+  (send dc draw-rectangle 15 184 96 112) ; dibujando una carta
+  (send dc draw-rectangle 126 184 96 112) ; dibujando una carta
+  (send dc draw-rectangle 237 184 96 112) ; dibujando una carta
+  ;(send dc draw-text "♥" 60 60) ; texto en la carta
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: canvas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -177,17 +260,18 @@
 (define (paint-callback0 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
-  
  )
 
 (define (paint-callback1 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
+  (draw-cards canvas)
  )
 
 (define (paint-callback2 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
+  (draw-cards canvas)
  )
 
 (define (paint-callback3 canvas dc)
@@ -224,9 +308,7 @@
 
 (define hit1 (new button% [parent player1Panel]
                          [label "Pedir"]
-                         [callback (lambda (button event)
-                                     (paint-callback1)
-                                     (twoPButtonCallback event))]))
+                         [callback (lambda (button event))]))
 
 (define stand1 (new button% [parent player1Panel]
                          [label "Plantarse"]
@@ -252,5 +334,3 @@
                          [label "Plantarse"]
                          [callback (lambda (button event)
                                      (threePButtonCallback event))]))  
-
-                                                                        
