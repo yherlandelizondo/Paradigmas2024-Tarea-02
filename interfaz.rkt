@@ -308,7 +308,8 @@
 
 (define hit1 (new button% [parent player1Panel]
                          [label "Pedir"]
-                         [callback (lambda (button event))]))
+                         [callback (lambda (button event)
+                                     (test event))]))
 
 (define stand1 (new button% [parent player1Panel]
                          [label "Plantarse"]
@@ -334,3 +335,8 @@
                          [label "Plantarse"]
                          [callback (lambda (button event)
                                      (threePButtonCallback event))]))  
+
+(define (test event)
+  (newline)
+  (display tempA)
+  (newline))
