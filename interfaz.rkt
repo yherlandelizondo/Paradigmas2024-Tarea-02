@@ -183,7 +183,6 @@
                          [callback (lambda (button event)
                                      (elevenAButtonCallback event))]))
 
-;no estoy segura de lo de la variable******************************************************************************************************************************
 (define (oneAButtonCallback event)
   (set! valA (+ valA 1))
   (send aWindow show #f)
@@ -273,7 +272,7 @@
 ;formato para dibujar cartas: (send dc draw-rectangle xCoord yCoord width height)
 
 (define (drawCards canvas cardList coordList) 
-
+  
   (define dc (send canvas get-dc))
   (send dc set-text-foreground "black")
   (send dc set-font (make-object font% 14 'default 'normal))
@@ -282,23 +281,40 @@
   (for ([card cardList] ;card: carta actual
         [coord coordList] ;coord: lista de coordenadas de la carta actual
         [i (in-naturals)]) ;indice para el bucle
+    
+    (define coords (car coord)) ;obteniendo las coordenadas por separado
+    (define dimentions (cadr coord)) ;obteniendo las dimensiones por separado
 
-    (define xCoord (caar coordList)) ;extrayendo el valor de la coord x de la carta
-    (define yCoord (cadar coordList)) ;extrayendo el valor de la coord y de la carta
-    (define width (caadr coordList)) ;extrayendo la anchura de la carta
-    (define height (cadadr coordList)) ;extrayendo la altura de la carta
+    (define xCoord (car coords)) ;extrayendo el valor de la coord x de la carta
+    (define yCoord (cadr coords)) ;extrayendo el valor de la coord y de la carta
 
-    (define suit (symbol->string (cadr card))) ;extrayendo el simbolo de la carta
-    (define value (car card)) ;extrayendo el valor de la carta
-  
+    (define width (car dimentions)) ;extrayendo la anchura de la carta
+    (define height (cadr dimentions)) ;extrayendo la altura de la carta
+
+    (define (valueType) ;funcion utilizada por la variabilidad de los valores de cartas, ej: A, 6, K.
+      (cond ;extrayendo el valor de la carta y pasandolo a string
+        ((number? (car card))
+          (number->string (car card))) ;si es numero lo pasa a string
+
+        (else 
+          (symbol->string (car card))) ;si es un simbolo lo pasa a string
+      )
+    )
+    (valueType)
+    
+     
+    (define suit (symbol->string (cadr card))) ;extrayendo el simbolo de la carta y pasandolo a string
 
     (send dc draw-rectangle xCoord yCoord width height) ;dibujando la carta con dimensiones y coords extraidas
 
-    (define textX (+ xCoord 40)) ;definiendo una posición para colocar el texto de la carta en x
-    (define textY (+ yCoord 50)) ;definiendo una posición para colocar el texto de la carta en y
+    (define suitX (+ xCoord 42)) ;definiendo una posición para colocar el simb de la carta en x
+    (define suitY (+ yCoord 42)) ;definiendo una posición para colocar el simb de la carta en y
 
-    (send dc draw-text suit textX textY) ;dibujando el simbolo de la carta
-    (send dc draw-text value (+ xCoord 5) (+ yCoord 20)) ;dibujando el valor de la carta
+    (define textX (+ xCoord 5)) ;definiendo una posición para colocar el text de la carta en x
+    (define textY (+ yCoord 5)) ;definiendo una posición para colocar el text de la carta en y
+
+    (send dc draw-text suit suitX suitY) ;dibujando el simbolo de la carta
+    (send dc draw-text (valueType) textX textY) ;dibujando el valor de la carta
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: canvas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -308,25 +324,26 @@
 (define (paint-callback0 canvas dc)
   (send dc set-background (make-object color% 58 170 63)) ;color verde
   (send dc clear)
+  (drawCards canvas dealerDeck dealerCoords)
  )
 
 (define (paint-callback1 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
-  ;(drawCards canvas player1Deck playerCoords)
+  (drawCards canvas player1Deck playerCoords)
   
  )
 
 (define (paint-callback2 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
-  
+  (drawCards canvas player2Deck playerCoords)
  )
 
 (define (paint-callback3 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
-  ;(drawCards canvas)
+  (drawCards canvas player3Deck playerCoords)
  )
 
 ;dealer canvas definition
