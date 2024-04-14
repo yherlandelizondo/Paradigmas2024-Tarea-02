@@ -269,7 +269,7 @@
       (cond
         ((equal? player2Stand 1)
           (cond
-            ((equal? player3Stand 1) (displayln "Hola"))
+            ((equal? player3Stand 1) (displayln "Hola")) ;si todos estan plantados juega dealer
           ))
       ))
   )
@@ -442,9 +442,12 @@
                          [label "Plantarse"]
                          [callback (lambda (button event)
                                     (cond
-                                      ((zero? player1Stand)(stand1ButtonCallback event)); si el jugador no esta plantado cambia la var de control para plantarse
+                                      ((zero? player1Stand)
+                                        (begin
+                                          (stand1ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
+                                          (checkStand) ;checando si todos estan plantados
+                                        ))
                                     )
-                                    (checkStand) ;checando si todos estan plantados
                                     )]))
 
 (define hit2 (new button% [parent player2Panel]
@@ -463,10 +466,13 @@
                                     (cond
                                       ((>= players 2);checando que el jugador 2 este jugando
                                         (cond
-                                          ((zero? player2Stand)(stand2ButtonCallback event)); si el jugador no esta plantado cambia la var de control para plantarse
+                                          ((zero? player2Stand)
+                                            (begin
+                                              (stand2ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
+                                              (checkStand) ;checando si todos estan plantados 
+                                            ))
                                         ))
                                     )
-                                    (checkStand) ;checando si todos estan plantados
                                     )]))
 
 (define hit3 (new button% [parent player3Panel]
@@ -485,34 +491,40 @@
                                     (cond
                                       ((>= players 3);checando que el jugador 3 este jugando
                                         (cond
-                                          ((zero? player3Stand)(stand3ButtonCallback event)); si el jugador no esta plantado cambia la var de control para plantarse
+                                          ((zero? player3Stand)
+                                            (begin
+                                              (stand3ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
+                                              (checkStand) ;checando si todos estan plantados 
+                                            ))
                                         ))
                                     )
-                                    (checkStand) ;checando si todos estan plantados
                                     )]))  
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;Logic: logica para los botones de plantarse;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (stand1ButtonCallback event)
+(define (stand1ButtonCallback)
   (set! tempA Anum1)
   (set! Anum1 0)
   (set! tempId 1)
   (sumA 1)
   (set! player1Stand 1)
+  (checkStand) ;checando si todos estan plantados 
 )
-(define (stand2ButtonCallback event)
+(define (stand2ButtonCallback)
   (set! tempA Anum2)
   (set! Anum2 0)
   (set! tempId 2)
   (sumA 2)
   (set! player2Stand 1)
+  (checkStand) ;checando si todos estan plantados 
 )
-(define (stand3ButtonCallback event)
+(define (stand3ButtonCallback)
   (set! tempA Anum3)
   (set! Anum3 0)
   (set! tempId 3)
   (sumA 3)
   (set! player3Stand 1)
+  (checkStand) ;checando si todos estan plantados 
 )
 
 
@@ -525,21 +537,22 @@
         (set! dealerScore (+ player1Score (veriChara (caar randomDeck) 1)))
         (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
         (send upperPanel refresh) ; Refrescar el canvas
-
     ))
+
     ((equal? playerId 1) (begin ;si se trata del jugador 1, se anade la carta y su valor en puntaje 
         (set! player1Deck (cons (car randomDeck) player1Deck))
         (set! player1Score (+ player1Score (veriChara (caar randomDeck) 1)))
         (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
         (send player1Panel refresh) ; Refrescar el canvas
-
     ))
+
     ((equal? playerId 2) (begin ;si se trata del jugador 2, se anade la carta y su valor en puntaje 
         (set! player2Deck (cons (car randomDeck) player2Deck))
         (set! player2Score (+ player2Score (veriChara (caar randomDeck) 2)))
         (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
         (send player2Panel refresh) ; Refrescar el canvas
     ))
+
     (else(begin ;si se trata del jugador 3, se anade la carta y su valor en puntaje 
         (set! player3Deck (cons (car randomDeck) player3Deck))
         (set! player3Score (+ player3Score (veriChara (caar randomDeck) 3))) 
@@ -547,8 +560,29 @@
         (send player3Panel refresh) ; Refrescar el canvas
     ))
   )
-  
-  (printAux)
+
+  (cond
+    ((> player1Score 21) 
+      (begin
+        (stand1ButtonCallback); ;si el jugador una vez jugo se paso de 21, se planta automaticamente
+      )
+    )
+  )
+  (cond
+    ((> player2Score 21) 
+      (begin
+        (stand2ButtonCallback); ;si el jugador una vez jugo se paso de 21, se planta automaticamente
+      )
+    ) 
+  )
+  (cond
+    ((> player3Score 21) 
+      (begin
+        (stand3ButtonCallback); ;si el jugador una vez jugo se paso de 21, se planta automaticamente
+      )
+    )   
+  )
+  ;(printAux)
 )
 
 (define (test event)
