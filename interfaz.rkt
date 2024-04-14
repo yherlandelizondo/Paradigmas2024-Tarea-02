@@ -8,6 +8,7 @@
 (require math)
 (require "lib/randomDeck.rkt")
 (require "data/cons.rkt")
+(require "./logica.rkt")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Variables y constantes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -23,6 +24,9 @@
 (define player1Score 0)
 (define player2Score 0)
 (define player3Score 0)
+
+;;;;;;;variable booleana para controlar el flujo;;;;;;;
+(define dealerPlaying 0) ;sin esta variable, si el juego planta a alguien se encicla el programa
 
 ;;;;;;;contador provicional para asignar barajas/puntajes iniciales;;;;;;;
 (define cont 1) 
@@ -120,16 +124,87 @@
   (send selecWindow show #f))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;creacion de las 4 decks iniciales;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: creacion de las 4 decks iniciales;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (initializeDecks)
   (cond ((< cont 3) (deckAuxiliar (cons (car randomDeck) dealerDeck)))
         ((< cont 5) (deckAuxiliar (cons (car randomDeck) player1Deck)))
         ((< cont 7) (deckAuxiliar (cons (car randomDeck) player2Deck)))
         (else (deckAuxiliar (cons (car randomDeck) player3Deck)))
-          )
+  )
 )
 
-;printprintprintprintprintprintprintprintprintprintprintprintprintprintprintprintprintprintprint
+(define (deckAuxiliar newDeck)
+  (cond ((< cont 3) (begin 
+                      (set! dealerDeck newDeck)))
+        ((< cont 5) (begin
+                      (set! player1Deck newDeck)
+                      (set! player1Score (+ player1Score(veriChara (caar randomDeck) 1)))))
+        ((< cont 7) (begin
+                      (set! player2Deck newDeck)
+                      (set! player2Score (+ player2Score (veriChara (caar randomDeck) 2)))))
+        
+        (else (begin
+                (set! player3Deck newDeck)
+                (set! player3Score (+ player3Score(veriChara (caar randomDeck) 3))))))
+  
+  (set! cont (+ cont 1)) ; aumentando el contador auxiliar para asignar cartas
+  (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
+
+  (cond 
+    ((< cont 9) (initializeDecks))
+    (else 
+      (begin
+        (set! dealerScore (startDealerScore dealerDeck 0))
+        (printAux)
+      )
+    )
+  )
+
+  (cond
+    ((= players 1)(begin
+      (set! player2Score 0)
+      (set! player2Deck '())
+      (set! player3Score 0)
+      (set! player3Deck '())
+    ))
+
+    ((= players 2)(begin
+      (set! player3Score 0)
+      (set! player3Deck '())
+    ))
+  )
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: funcion para realizar las jugadas del dealer;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (dealerTurn)
+  (cond 
+    ((= dealerStand 1) (displayln "juego terminado")) ;FIXME: Aqui va la logica de terminar la partida de Gaby
+    (else ;primero se debe añadir la carta al deck (realizar la jugada como tal), luego se debe llamar recursivamente a dealerTurn para ver si se juega de nuevo
+      (begin
+       (set! dealerStand (dealerMove dealerScore))
+       (cond 
+        ((= dealerStand 0)(dealerUpdate))
+       )
+       (dealerTurn)
+      )
+    )
+  )
+  (send upperPanel refresh)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: logica para jugada del dealer despues de la primera vez;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (dealerUpdate)
+  (set! dealerDeck (cons (car randomDeck) dealerDeck))
+  (set! dealerScore (+ dealerScore (scoreSelector (car randomDeck) dealerScore)))
+  (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
+  (send upperPanel refresh) ; Refrescar el canvas
+  (printAux)
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Debugging: funcion para mostrar valores durante la ejecucion;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define (printAux)
   (newline)
   (print dealerDeck)
@@ -137,13 +212,14 @@
   (print player2Deck)
   (print player3Deck)
   (newline)
+  (displayln dealerScore)
   (displayln player1Score)
   (displayln player2Score)
   (displayln player3Score)
   )
   
 
-;***********************************************************Sumar ya todos lo A**********************************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; logic: tratamiento de As ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (sumA id)
   (cond((equal? tempA 0)(totalA tempId))
        ((equal? id 0)(begin (set! tempA (- tempA 1))(send aWindow show #t)))
@@ -158,7 +234,7 @@
        (else(set! player3Score (+ player3Score valA)))))
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ventana para dar valores a A;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: ventana valores de A ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define aWindow (new frame% [label "Valor de A"]
                         [width 550]
                         [height 300]))
@@ -208,7 +284,7 @@
   (send aWindow show #f)
   (sumA tempId))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Verificación del puntaje total;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: Verificación del puntaje total;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (veriChara character id)
   (cond ((equal? 'J character)10)
@@ -224,67 +300,16 @@
        ((equal? id 2)(set! Anum2 (+ Anum2 1)))
        (else(set! Anum3 (+ Anum3 1)))))
 
-(define (deckAuxiliar newDeck)
-  (cond ((< cont 3) (begin 
-                      (set! dealerDeck newDeck)
-                      (set! dealerScore (+ dealerScore (veriChara (caar randomDeck) 0)))))
-        ((< cont 5) (begin
-                      (set! player1Deck newDeck)
-                      (set! player1Score (+ player1Score(veriChara (caar randomDeck) 1)))))
-        ((< cont 7) (begin
-                      (set! player2Deck newDeck)
-                      (set! player2Score (+ player2Score (veriChara (caar randomDeck) 2)))))
-        
-        (else (begin
-                (set! player3Deck newDeck)
-                (set! player3Score (+ player3Score(veriChara (caar randomDeck) 3))))))
-  
-  (set! cont (+ cont 1)) ; aumentando el contador auxiliar para asignar cartas
-  (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
-
-  (cond 
-    ((< cont 9) (initializeDecks))
-    (else (printAux))
-  )
-
-  (cond
-    ((= players 1)(begin
-      (set! player2Score 0)
-      (set! player2Deck '())
-      (set! player3Score 0)
-      (set! player3Deck '())
-    ))
-
-    ((= players 2)(begin
-      (set! player3Score 0)
-      (set! player3Deck '())
-    ))
-  )
-)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;checa que todos esten plantados;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (checkStand) ;si todos estan plantados empieza a jugar el dealer
-  (cond
-    ((equal? player1Stand 1)
-      (cond
-        ((equal? player2Stand 1)
-          (cond
-            ((equal? player3Stand 1) (displayln "Hola")) ;si todos estan plantados juega dealer
-          ))
-      ))
-  )
-) 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;show the selec frame;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (send selecWindow show #t)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Pantalla principal;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: Pantalla principal;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define mainWindow (new frame% [label "BlaCEJack"]
                         [width 1050]
                         [height 670]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Disposicion de la pantalla;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: Disposicion de la pantalla;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define mainPanel (new vertical-panel% [parent mainWindow])) ;panel principal
 
 (define upperPanel (new horizontal-panel% [parent mainPanel] ;panel superior 
@@ -429,7 +454,7 @@
                     [paint-callback paint-callback3]
                     ))                    
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Buttons for decisions;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: Buttons for decisions;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define hit1 (new button% [parent player1Panel]
                          [label "Pedir"]
@@ -445,7 +470,6 @@
                                       ((zero? player1Stand)
                                         (begin
                                           (stand1ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
-                                          (checkStand) ;checando si todos estan plantados
                                         ))
                                     )
                                     )]))
@@ -469,7 +493,6 @@
                                           ((zero? player2Stand)
                                             (begin
                                               (stand2ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
-                                              (checkStand) ;checando si todos estan plantados 
                                             ))
                                         ))
                                     )
@@ -494,11 +517,72 @@
                                           ((zero? player3Stand)
                                             (begin
                                               (stand3ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
-                                              (checkStand) ;checando si todos estan plantados 
                                             ))
                                         ))
                                     )
                                     )]))  
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: checa que todos esten plantados;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define (checkStand)
+  (cond
+    ((= players 3) ; Caso para 3 jugadores
+     (cond
+        ((= player1Stand 1)
+          (cond
+            ((= player2Stand 1)
+              (cond
+              ((= player3Stand 1) 
+                (cond 
+                  ((zero? dealerPlaying)
+                    (begin
+                      (set! dealerPlaying 1)
+                      (dealerTurn)
+                    )
+                  )
+                )
+              ) 
+              )
+            )
+          )
+        )
+      )
+    )
+
+    ((= players 2) ; Caso para 2 jugadores
+      (cond
+        ((= player1Stand 1)
+          (cond
+            ((= player2Stand 1) 
+              (cond 
+                ((zero? dealerPlaying)
+                  (begin
+                    (set! dealerPlaying 1)
+                    (dealerTurn)
+                  )
+                )  
+              )
+            )
+          )
+        )
+      )
+    )
+    
+    ((= players 1) ; Caso para 1 jugador
+      (cond
+        ((= player1Stand 1) 
+          (cond 
+            ((zero? dealerPlaying)
+            (begin
+              (set! dealerPlaying 1)
+              (dealerTurn)
+            )
+            )
+          )
+        )
+      )
+    )
+  )
+)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;Logic: logica para los botones de plantarse;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -534,7 +618,7 @@
   (cond 
     ((equal? playerId 0) (begin ;si se trata del jugador 1, se anade la carta y su valor en puntaje 
         (set! dealerDeck (cons (car randomDeck) dealerDeck))
-        (set! dealerScore (+ player1Score (veriChara (caar randomDeck) 1)))
+        (set! dealerScore (+ dealerScore (scoreSelector (car randomDeck) dealerScore)))
         (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
         (send upperPanel refresh) ; Refrescar el canvas
     ))
@@ -582,10 +666,6 @@
       )
     )   
   )
-  ;(printAux)
+  (printAux)
 )
 
-(define (test event)
-  (newline)
-  (display tempA)
-  (newline))
