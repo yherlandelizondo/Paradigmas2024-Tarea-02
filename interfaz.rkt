@@ -118,10 +118,12 @@
 
 ;printprintprintprintprintprintprintprintprintprintprintprintprintprintprintprintprintprintprint
 (define (printAux)
+  (newline)
   (print dealerDeck)
   (print player1Deck)
   (print player2Deck)
   (print player3Deck))
+  (newline)
 
 ;***********************************************************Sumar ya todos lo A**********************************************************************
 (define (sumA id)
@@ -223,8 +225,8 @@
                 (set! player3Deck newDeck)
                 (set! player3Score (+ player3Score(veriChara (caar randomDeck) 3))))))
   
-  (set! cont (+ cont 1))
-  (set! randomDeck (cdr randomDeck))
+  (set! cont (+ cont 1)) ; aumentando el contador auxiliar para asignar cartas
+  (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
   (cond ((< cont 9) (initializeDecks))
         (else (printAux)))
 )
@@ -374,7 +376,7 @@
 (define hit1 (new button% [parent player1Panel]
                          [label "Pedir"]
                          [callback (lambda (button event)
-                                     (test event))]))
+                                     (hit 1))]))
 
 (define stand1 (new button% [parent player1Panel]
                          [label "Plantarse"]
@@ -384,7 +386,7 @@
 (define hit2 (new button% [parent player2Panel]
                          [label "Pedir"]
                          [callback (lambda (button event)
-                                     (twoPButtonCallback event))]))
+                                     (hit 2))]))
 
 (define stand2 (new button% [parent player2Panel]
                          [label "Plantarse"]
@@ -394,14 +396,14 @@
 (define hit3 (new button% [parent player3Panel]
                          [label "Pedir"]
                          [callback (lambda (button event)
-                                     (twoPButtonCallback event))]))
+                                     (hit 3))]))
 
 (define stand3 (new button% [parent player3Panel]
                          [label "Plantarse"]
                          [callback (lambda (button event)
                                      (stand3ButtonCallback event))]))  
 
-;****************************************************Llamadas de plantarse**************************************************************************************
+;;;;;;;;;;;;;;;;;;;;;;;;;;;Logic: logica para los botones de plantarse;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (stand1ButtonCallback event)
   (set! tempA Anum1)
@@ -419,6 +421,41 @@
   (set! tempId 3)
   (sumA 3))
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;Logic: logica para los botones de pedir;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (hit playerId) ;funcion para anadir una carta nueva a la baraja de cada jugador
+  (cond 
+    ((equal? playerId 0) (begin ;si se trata del jugador 1, se anade la carta y su valor en puntaje 
+        (set! dealerDeck (cons (car randomDeck) dealerDeck))
+        (set! dealerScore (+ player1Score (veriChara (caar randomDeck) 1)))
+        (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
+        (send upperPanel refresh) ; Refrescar el canvas
+
+    ))
+    ((equal? playerId 1) (begin ;si se trata del jugador 1, se anade la carta y su valor en puntaje 
+        (set! player1Deck (cons (car randomDeck) player1Deck))
+        (set! player1Score (+ player1Score (veriChara (caar randomDeck) 1)))
+        (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
+        (send player1Panel refresh) ; Refrescar el canvas
+
+    ))
+    ((equal? playerId 2) (begin ;si se trata del jugador 2, se anade la carta y su valor en puntaje 
+        (set! player2Deck (cons (car randomDeck) player2Deck))
+        (set! player2Score (+ player2Score (veriChara (caar randomDeck) 2)))
+        (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
+        (send player2Panel refresh) ; Refrescar el canvas
+    ))
+    (else(begin ;si se trata del jugador 3, se anade la carta y su valor en puntaje 
+        (set! player3Deck (cons (car randomDeck) player3Deck))
+        (set! player3Score (+ player3Score (veriChara (caar randomDeck) 3))) 
+        (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
+        (send player3Panel refresh) ; Refrescar el canvas
+    ))
+  )
+  
+  (printAux)
+)
 
 (define (test event)
   (newline)
