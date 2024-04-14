@@ -15,7 +15,7 @@
               (9 ♥) (9 ♠️) (9 ♣) (9 ♦)
               (10 ♥) (10 ♠️) (10 ♣) (10 ♦)))
 
-(define (randomList)
+(define (randomList) ;funcion para aleatorizar la baraja
   (shuffle deck))
 
 

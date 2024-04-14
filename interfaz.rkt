@@ -105,27 +105,27 @@
                          [callback (lambda (button event)
                                      (threePButtonCallback event))]))
 
-(define (onePButtonCallback event)
-  (set! players 1)
-  (initializeDecks)
-  (send mainWindow show #t)
-  (send selecWindow show #f))
+(define (onePButtonCallback event) ;si se pulsa un jugador
+  (set! players 1) ;modificando la cantidad de jugadores
+  (initializeDecks) ;se inicializan las bajaras
+  (send mainWindow show #t) ;se muestra la ventana de juego
+  (send selecWindow show #f)) ;se desactiva la ventana de seleccion de jugador
 
-(define (twoPButtonCallback event)
-  (set! players 2)
-  (initializeDecks)
-  (send mainWindow show #t)
-  (send selecWindow show #f))
+(define (twoPButtonCallback event) ;si se pulsa dos jugadores
+  (set! players 2) ;modificando la cantidad de jugadores
+  (initializeDecks) ;se inicializan las bajaras
+  (send mainWindow show #t) ;se muestra la ventana de juego
+  (send selecWindow show #f)) ;se desactiva la ventana de seleccion de jugador
 
-(define (threePButtonCallback event)
-  (set! players 3)
-  (initializeDecks)
-  (send mainWindow show #t)
-  (send selecWindow show #f))
+(define (threePButtonCallback event) ;si se pulsa tres jugadores
+  (set! players 3) ;modificando la cantidad de jugadores
+  (initializeDecks) ;se inicializan las bajaras
+  (send mainWindow show #t) ;se muestra la ventana de juego
+  (send selecWindow show #f)) ;se desactiva la ventana de seleccion de jugador
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: creacion de las 4 decks iniciales;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (initializeDecks)
+(define (initializeDecks); uso de el contador de control para asignar 2 cartas a cada jugador, se llama recursivamente con apoyo de deckAuxiliar
   (cond ((< cont 3) (deckAuxiliar (cons (car randomDeck) dealerDeck)))
         ((< cont 5) (deckAuxiliar (cons (car randomDeck) player1Deck)))
         ((< cont 7) (deckAuxiliar (cons (car randomDeck) player2Deck)))
@@ -133,7 +133,7 @@
   )
 )
 
-(define (deckAuxiliar newDeck)
+(define (deckAuxiliar newDeck) ;funcion usada para ir anadiendo cada carta a la baraja de los jugadores, ademas se va anadiendo el respectivo puntaje
   (cond ((< cont 3) (begin 
                       (set! dealerDeck newDeck)))
         ((< cont 5) (begin
@@ -151,24 +151,24 @@
   (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
 
   (cond 
-    ((< cont 9) (initializeDecks))
+    ((< cont 9) (initializeDecks));entra aqui si no ha terminado de agregar las 8 cartas (llamada recursiva)
     (else 
       (begin
-        (set! dealerScore (startDealerScore dealerDeck 0))
+        (set! dealerScore (startDealerScore dealerDeck 0)) ;obteniendo el puntaje del dealer desde la logica principal
         (printAux)
       )
     )
   )
 
   (cond
-    ((= players 1)(begin
+    ((= players 1)(begin ;si solo hay un jugador los otros dos jugadores se colocan con 0 pts y sin baraja
       (set! player2Score 0)
       (set! player2Deck '())
       (set! player3Score 0)
       (set! player3Deck '())
     ))
 
-    ((= players 2)(begin
+    ((= players 2)(begin ;si hay dos jugadores el jugador 3 se pone con puntuacion 0 y sin baraja
       (set! player3Score 0)
       (set! player3Deck '())
     ))
@@ -178,28 +178,27 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: funcion para realizar las jugadas del dealer;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (dealerTurn)
-
   (cond 
-    ((= dealerStand 1) (displayln "juego terminado")) ;FIXME: Aqui va la logica de terminar la partida de Gaby
+    ((= dealerStand 1) (displayln "juego terminado")) ;si el dealer se planta significa que la partida termino
     (else ;primero se debe añadir la carta al deck (realizar la jugada como tal), luego se debe llamar recursivamente a dealerTurn para ver si se juega de nuevo
       (begin
        (set! dealerStand (dealerMove dealerScore))
        (cond 
-        ((= dealerStand 0)(dealerUpdate))
+        ((= dealerStand 0)(dealerUpdate)) ;condicion utilizada para que el dealer solo juegue cuando no esta plantado
        )
-       (dealerTurn)
+       (dealerTurn);llamada recursiva para realizar todas las jugadas
       )
     )
   )
   
-  (send upperPanel refresh)
+  (send upperPanel refresh) ;refrescando el canvas para reflejar los cambios
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: logica para jugada del dealer despues de la primera vez;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (dealerUpdate)
-  (set! dealerDeck (cons (car randomDeck) dealerDeck))
-  (set! dealerScore (+ dealerScore (scoreSelector (car randomDeck) dealerScore)))
+(define (dealerUpdate) ;funcion para ejecutar la logica del dealer
+  (set! dealerDeck (cons (car randomDeck) dealerDeck)) ;modificando la baraja del dealer
+  (set! dealerScore (+ dealerScore (scoreSelector (car randomDeck) dealerScore))) ;modificando el puntaje del dealer, utilizando la funcion que elige los puntajes correspondientes en la logica
   (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
   (send upperPanel refresh) ; Refrescar el canvas
   (printAux)
@@ -291,13 +290,13 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: Verificación del puntaje total;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (veriChara character id)
-  (cond ((equal? 'J character)10)
-        ((equal? 'Q character)10)
-        ((equal? 'K character)10)
-        ((equal? 'A character)(begin
+(define (veriChara character id) ;verifica el valor de un caracter o numero
+  (cond ((equal? 'J character)10) ;J asigna 10 de puntaje
+        ((equal? 'Q character)10) ;Q asigna 10 de puntaje
+        ((equal? 'K character)10) ;K asigna 10 de puntaje
+        ((equal? 'A character)(begin ;A asigna 1 o 11 de puntaje, dependiendo del jugador
                                     (incA id) 0))
-        (else character)))
+        (else character))) ;cualquier numero asigna su mismo valor
 
 (define (incA id)
   (cond((equal? id 0)(set! Anumd (+ Anumd 1)))
@@ -348,7 +347,7 @@
 
 (define (drawCards canvas cardList coordList) 
   
-  (define dc (send canvas get-dc))
+  (define dc (send canvas get-dc)) ;obteniendo el entorno
   (send dc set-text-foreground "black")
   (send dc set-font (make-object font% 14 'default 'normal))
 
@@ -399,10 +398,10 @@
 (define (paint-callback0 canvas dc) ;canvas de dealer
   (send dc set-background (make-object color% 58 170 63)) ;color verde
   (send dc clear)
-  (drawCards canvas dealerDeck dealerCoords)
+  (drawCards canvas dealerDeck dealerCoords) ;llamando a la funcion para imprimir las cartas del dealer
 
   (cond
-    ((zero? hiddenCard)
+    ((zero? hiddenCard) ;si la varialbe hiddenCard es 0, se muestra un rectangulo que oculta la primera carta (solo sucede en la primera jugada del dealer)
       (begin 
         (send dc draw-rectangle 190 16.66 96 112)
         (send dc draw-text (symbol->string '?) 195 21.66)
@@ -410,20 +409,20 @@
       )
     )
   )
-  (set! hiddenCard 1)
+  (set! hiddenCard 1) ;cambiando el valor de hiddenCard para que no se vuelva a mostrar el rectangulo para ocultar
  )
 
 (define (paint-callback1 canvas dc) ;canvas de jugador 1
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
-  (drawCards canvas player1Deck playerCoords)
+  (drawCards canvas player1Deck playerCoords) ;imprimiendo las cartas del jugador 1
  )
 
 (define (paint-callback2 canvas dc) ;canvas de jugador 2
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
   (cond
-    ((>= players 2)(drawCards canvas player2Deck playerCoords))
+    ((>= players 2)(drawCards canvas player2Deck playerCoords)) ;imprimiendo las cartas del jugador 2, si y solo si la cantidad de jugadores es mayor o igual a 2
   )
  )
 
@@ -431,7 +430,7 @@
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
   (cond
-    ((>= players 3)(drawCards canvas player3Deck playerCoords))
+    ((>= players 3)(drawCards canvas player3Deck playerCoords)) ;imprimiendo las cartas del jugador 3, si y solo si la cantidad de jugadores es mayor o igual a 3
   )
  )
 
@@ -472,11 +471,11 @@
                          [label "Plantarse"]
                          [callback (lambda (button event)
                                     (cond
-                                      ((zero? player1Stand)
+                                      ((zero? player1Stand) ;verifica si el jugador esta plantado
                                         (begin
                                           (stand1ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
                                         ))
-                                      (else (send stand1 set-label "Plantado"))
+                                      (else (send stand1 set-label "Plantado")) ;si la computadora planto al jugador se actualiza el label
                                     )
                                     )]))
 
@@ -496,11 +495,11 @@
                                     (cond
                                       ((>= players 2);checando que el jugador 2 este jugando
                                         (cond
-                                          ((zero? player2Stand)
+                                          ((zero? player2Stand) ;verifica si el jugador esta plantado
                                             (begin
                                               (stand2ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
                                             ))
-                                          (else (send stand2 set-label "Plantado"))
+                                          (else (send stand2 set-label "Plantado")) ;si la computadora planto al jugador se actualiza el label
                                         ))
                                     )
                                     )]))
@@ -521,7 +520,7 @@
                                     (cond
                                       ((>= players 3);checando que el jugador 3 este jugando
                                         (cond
-                                          ((zero? player3Stand)
+                                          ((zero? player3Stand) ;verifica si el jugador esta plantado
                                             (begin
                                               (stand3ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
                                             ))
@@ -544,7 +543,7 @@
                   ((zero? dealerPlaying)
                     (begin
                       (set! dealerPlaying 1)
-                      (dealerTurn)
+                      (dealerTurn) ; si todos estan plantados juega el dealer
                     )
                   )
                 )
@@ -565,7 +564,7 @@
                 ((zero? dealerPlaying)
                   (begin
                     (set! dealerPlaying 1)
-                    (dealerTurn)
+                    (dealerTurn) ; si los 2 jugadores estan plantados juega el dealer
                   )
                 )  
               )
@@ -582,7 +581,7 @@
             ((zero? dealerPlaying)
             (begin
               (set! dealerPlaying 1)
-              (dealerTurn)
+              (dealerTurn) ; si el jugador 1 esta plantado juega el dealer
             )
             )
           )
@@ -595,27 +594,27 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;Logic: logica para los botones de plantarse;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (stand1ButtonCallback)
-  (send stand1 set-label "Plantado")
+  (send stand1 set-label "Plantado") ;si se planta de manera voluntaria se cambia label
   (set! tempA Anum1)
   (set! Anum1 0)
   (set! tempId 1)
-  (set! player1Stand 1)
+  (set! player1Stand 1) ;se coloca el jugador 1 como plantado
   (sumA 1)
 )
 (define (stand2ButtonCallback)
-  (send stand2 set-label "Plantado")
+  (send stand2 set-label "Plantado") ;si se planta de manera voluntaria se cambia label
   (set! tempA Anum2)
   (set! Anum2 0)
   (set! tempId 2)
-  (set! player2Stand 1)
+  (set! player2Stand 1) ;se coloca el jugador 2 como plantado
   (sumA 2)
 )
 (define (stand3ButtonCallback)
-  (send stand3 set-label "Plantado")
+  (send stand3 set-label "Plantado") ;si se planta de manera voluntaria se cambia label
   (set! tempA Anum3)
   (set! Anum3 0)
   (set! tempId 3)
-  (set! player3Stand 1)
+  (set! player3Stand 1) ;se coloca el jugador 3 como plantado
   (sumA 3)
 )
 
