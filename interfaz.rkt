@@ -178,6 +178,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: funcion para realizar las jugadas del dealer;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (dealerTurn)
+
   (cond 
     ((= dealerStand 1) (displayln "juego terminado")) ;FIXME: Aqui va la logica de terminar la partida de Gaby
     (else ;primero se debe añadir la carta al deck (realizar la jugada como tal), luego se debe llamar recursivamente a dealerTurn para ver si se juega de nuevo
@@ -190,6 +191,7 @@
       )
     )
   )
+  
   (send upperPanel refresh)
 )
 
@@ -221,7 +223,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; logic: tratamiento de As ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (sumA id)
-  (cond((equal? tempA 0)(totalA tempId))
+
+  (cond((equal? tempA 0)(begin (totalA tempId)(checkStand)))
        ((equal? id 0)(begin (set! tempA (- tempA 1))(send aWindow show #t)))
        ((equal? id 1)(begin (set! tempA (- tempA 1))(send aWindow show #t)))
        ((equal? id 2)(begin (set! tempA (- tempA 1))(send aWindow show #t)))
@@ -231,7 +234,9 @@
   (cond((equal? id 0)(set! dealerScore (+ dealerScore valA)))
        ((equal? id 1)(set! player1Score (+ player1Score valA)))
        ((equal? id 2)(set! player2Score (+ player2Score valA)))
-       (else(set! player3Score (+ player3Score valA)))))
+       (else(set! player3Score (+ player3Score valA)))
+  )
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: ventana valores de A ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -594,27 +599,24 @@
   (set! tempA Anum1)
   (set! Anum1 0)
   (set! tempId 1)
-  (sumA 1)
   (set! player1Stand 1)
-  (checkStand) ;checando si todos estan plantados 
+  (sumA 1)
 )
 (define (stand2ButtonCallback)
   (send stand2 set-label "Plantado")
   (set! tempA Anum2)
   (set! Anum2 0)
   (set! tempId 2)
-  (sumA 2)
   (set! player2Stand 1)
-  (checkStand) ;checando si todos estan plantados 
+  (sumA 2)
 )
 (define (stand3ButtonCallback)
   (send stand3 set-label "Plantado")
   (set! tempA Anum3)
   (set! Anum3 0)
   (set! tempId 3)
-  (sumA 3)
   (set! player3Stand 1)
-  (checkStand) ;checando si todos estan plantados 
+  (sumA 3)
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;Logic: logica para los botones de pedir;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
