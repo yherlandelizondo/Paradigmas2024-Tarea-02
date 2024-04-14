@@ -32,13 +32,13 @@
 (define cont 1) 
 
 ;;;;;;;variables para realizar la suma de los aces en el puntaje;;;;;;;
-(define Anumd 0)
-(define Anum1 0)
-(define Anum2 0)
-(define Anum3 0)
-(define tempA 0)
-(define valA 0)
-(define tempId 0)
+(define Anumd 0) ;cantidad de A's del dealer
+(define Anum1 0) ;cantidad de A's del jugador 1
+(define Anum2 0) ;cantidad de A's del jugador 2 
+(define Anum3 0) ;cantidad de A's del jugador 3
+(define tempA 0) ;variable temporal de cantidad de A's del jugador que se esta analizando en ese momento 
+(define valA 0) ;valor que va sumando de los A's
+(define tempId 0) ;
 
 ;;;;;;;variables booleanas para manejar el "plantarse. 1=plantado 0=jugando;;;;;;;
 (define dealerStand 0)
@@ -471,6 +471,7 @@
                                         (begin
                                           (stand1ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
                                         ))
+                                      (else (send stand1 set-label "Plantado"))
                                     )
                                     )]))
 
@@ -494,6 +495,7 @@
                                             (begin
                                               (stand2ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
                                             ))
+                                          (else (send stand2 set-label "Plantado"))
                                         ))
                                     )
                                     )]))
@@ -518,6 +520,7 @@
                                             (begin
                                               (stand3ButtonCallback); si el jugador no esta plantado cambia la var de control para plantarse
                                             ))
+                                          (else (send stand3 set-label "Plantado"))
                                         ))
                                     )
                                     )]))  
@@ -587,6 +590,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;Logic: logica para los botones de plantarse;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (stand1ButtonCallback)
+  (send stand1 set-label "Plantado")
   (set! tempA Anum1)
   (set! Anum1 0)
   (set! tempId 1)
@@ -595,6 +599,7 @@
   (checkStand) ;checando si todos estan plantados 
 )
 (define (stand2ButtonCallback)
+  (send stand2 set-label "Plantado")
   (set! tempA Anum2)
   (set! Anum2 0)
   (set! tempId 2)
@@ -603,6 +608,7 @@
   (checkStand) ;checando si todos estan plantados 
 )
 (define (stand3ButtonCallback)
+  (send stand3 set-label "Plantado")
   (set! tempA Anum3)
   (set! Anum3 0)
   (set! tempId 3)
@@ -610,7 +616,6 @@
   (set! player3Stand 1)
   (checkStand) ;checando si todos estan plantados 
 )
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;Logic: logica para los botones de pedir;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
