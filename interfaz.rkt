@@ -7,7 +7,6 @@
 (require racket/gui/base)
 (require math)
 (require "lib/randomDeck.rkt")
-(require "lib/readWrite.rkt")
 (require "data/cons.rkt")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Variables y constantes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
