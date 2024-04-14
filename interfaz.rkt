@@ -8,6 +8,7 @@
 (require math)
 (require "lib/randomDeck.rkt")
 (require "lib/readWrite.rkt")
+(require "data/cons.rkt")
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Variables y constantes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define players 0)
@@ -21,15 +22,17 @@
 (define player1Score 0)
 (define player2Score 0)
 (define player3Score 0)
-(define tempA 0)
+(define Anumd 0)
+(define Anum1 0)
+(define Anum2 0)
+(define Anum3 0)
+(define tempA 0)
+(define valA 0)
+(define tempId 0)
 
-
-
-;(define listaArchivo (readFile "C:/Users/NOS/Documents/1....Works/Paradigmas2024-Tarea-02/temp/temp.txt"))
-;(newline)
-;(display (car listaArchivo))
-;(newline)
-
+;;;;Cordenadas para las cartas de los jugadores / dealer;;;;;;;
+(define dealerCoords (getCoords 0))
+(define playerCoords (getCoords 1))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;funciones especifica;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -121,7 +124,26 @@
   (print player2Deck)
   (print player3Deck))
 
-;Ventana para valor de A******************************************************
+;***********************************************************Sumar ya todos lo A**********************************************************************
+(define (sumA id)
+  (cond((equal? tempA 0)(send aWindow show #f))
+       ((equal? id 0)(begin (set! tempA (- tempA 1))(send aWindow show #t)))
+       ((equal? id 1)(begin (set! tempA (- tempA 1))(send aWindow show #t)))
+       ((equal? id 2)(begin (set! tempA (- tempA 1))(send aWindow show #t)))
+       (else(begin (set! tempA (- tempA 1))(send aWindow show #t)))))
+
+(define (totalA id)
+  (cond((equal? id 0)(set! dealerScore (+ dealerScore valA)))
+       ((equal? id 1)(set! player1Score (+ player1Score valA)))
+       ((equal? id 2)(set! player2Score (+ player2Score valA)))
+       (else(set! player3Score (+ player3Score valA)))))
+
+
+
+
+(set! player1Score (+ player1Score valA))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ventana para dar valores a A;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define aWindow (new frame% [label "Valor de A"]
                         [width 550]
                         [height 300]))
@@ -161,38 +183,47 @@
                          [callback (lambda (button event)
                                      (elevenAButtonCallback event))]))
 
+;no estoy segura de lo de la variable******************************************************************************************************************************
 (define (oneAButtonCallback event)
-  (set! tempA 1)
-  (send aWindow show #f))
+  (set! valA (+ valA 1))
+  (send aWindow show #f)
+  (sumA tempId))
 
 (define (elevenAButtonCallback event)
-  (set! tempA 11)
-  (send aWindow show #f))
-;Verificación del puntaje total***********************************************
+  (set! valA (+ valA 11))
+  (send aWindow show #f)
+  (sumA tempId))
 
-(define (veriChara character)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Verificación del puntaje total;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (veriChara character id)
   (cond ((equal? 'J character)10)
         ((equal? 'Q character)10)
         ((equal? 'K character)10)
         ((equal? 'A character)(begin
-                               (send aWindow show #t)
-                               (veriChara tempA)))
+                                    (incA id) 0))
         (else character)))
+
+(define (incA id)
+  (cond((equal? id 0)(set! Anumd (+ Anumd 1)))
+       ((equal? id 1)(set! Anum1 (+ Anum1 1)))
+       ((equal? id 2)(set! Anum2 (+ Anum2 1)))
+       (else(set! Anum3 (+ Anum3 1)))))
 
 (define (deckAuxiliar newDeck)
   (cond ((< cont 3) (begin 
-                          (set! dealerDeck newDeck)
-                          (set! dealerScore (+ dealerScore (veriChara (caar randomDeck))))))
+                      (set! dealerDeck newDeck)
+                      (set! dealerScore (+ dealerScore (veriChara (caar randomDeck) 0)))))
         ((< cont 5) (begin
                       (set! player1Deck newDeck)
-                      (set! player1Score (+ player1Score(veriChara (caar randomDeck))))))
+                      (set! player1Score (+ player1Score(veriChara (caar randomDeck) 1)))))
         ((< cont 7) (begin
                       (set! player2Deck newDeck)
-                      (set! player2Score (+ player2Score (veriChara (caar randomDeck))))))
+                      (set! player2Score (+ player2Score (veriChara (caar randomDeck) 2)))))
         
         (else (begin
                 (set! player3Deck newDeck)
-                (set! player3Score (+ player3Score(veriChara (caar randomDeck)))))))
+                (set! player3Score (+ player3Score(veriChara (caar randomDeck) 3))))))
   
   (set! cont (+ cont 1))
   (set! randomDeck (cdr randomDeck))
@@ -209,7 +240,7 @@
                         [width 1050]
                         [height 670]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Disposicion de la pantalla;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;structure: Disposicion de la pantalla;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define mainPanel (new vertical-panel% [parent mainWindow])) ;panel principal
 
 (define upperPanel (new horizontal-panel% [parent mainPanel] ;panel superior 
@@ -237,47 +268,65 @@
                         [min-height 390]
                         ))  
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: cartas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define (draw-cards canvas)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: cartas de jugadores;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;formato para dibujar cartas: (send dc draw-rectangle xCoord yCoord width height)
+
+(define (drawCards canvas cardList coordList) 
+
   (define dc (send canvas get-dc))
   (send dc set-text-foreground "black")
-  (send dc set-font (make-object font% 14 'default 'normal 'normal))
+  (send dc set-font (make-object font% 14 'default 'normal))
 
-  (send dc draw-rectangle 15 40 96 112) ; dibujando una carta
-  (send dc draw-rectangle 126 40 96 112) ; dibujando una carta
-  (send dc draw-rectangle 237 40 96 112) ; dibujando una carta
+  ; Recorrer la lista de cartas y las coordenadas asociadas
+  (for ([card cardList] ;card: carta actual
+        [coord coordList] ;coord: lista de coordenadas de la carta actual
+        [i (in-naturals)]) ;indice para el bucle
 
-  (send dc draw-rectangle 15 184 96 112) ; dibujando una carta
-  (send dc draw-rectangle 126 184 96 112) ; dibujando una carta
-  (send dc draw-rectangle 237 184 96 112) ; dibujando una carta
-  ;(send dc draw-text "♥" 60 60) ; texto en la carta
-  )
+    (define xCoord (caar coordList)) ;extrayendo el valor de la coord x de la carta
+    (define yCoord (cadar coordList)) ;extrayendo el valor de la coord y de la carta
+    (define width (caadr coordList)) ;extrayendo la anchura de la carta
+    (define height (cadadr coordList)) ;extrayendo la altura de la carta
+
+    (define suit (symbol->string (cadr card))) ;extrayendo el simbolo de la carta
+    (define value (car card)) ;extrayendo el valor de la carta
+  
+
+    (send dc draw-rectangle xCoord yCoord width height) ;dibujando la carta con dimensiones y coords extraidas
+
+    (define textX (+ xCoord 40)) ;definiendo una posición para colocar el texto de la carta en x
+    (define textY (+ yCoord 50)) ;definiendo una posición para colocar el texto de la carta en y
+
+    (send dc draw-text suit textX textY) ;dibujando el simbolo de la carta
+    (send dc draw-text value (+ xCoord 5) (+ yCoord 20)) ;dibujando el valor de la carta
+    ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;graphics: canvas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;functions to refresh each canvas
 
 (define (paint-callback0 canvas dc)
-  (send dc set-background (make-object color% 58 170 63))
+  (send dc set-background (make-object color% 58 170 63)) ;color verde
   (send dc clear)
  )
 
 (define (paint-callback1 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
-  (draw-cards canvas)
+  ;(drawCards canvas player1Deck playerCoords)
+  
  )
 
 (define (paint-callback2 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
-  (draw-cards canvas)
+  
  )
 
 (define (paint-callback3 canvas dc)
   (send dc set-background (make-object color% 58 170 63))
   (send dc clear)
-  (draw-cards canvas)
+  ;(drawCards canvas)
  )
 
 ;dealer canvas definition
@@ -314,7 +363,7 @@
 (define stand1 (new button% [parent player1Panel]
                          [label "Plantarse"]
                          [callback (lambda (button event)
-                                     (threePButtonCallback event))]))
+                                     (stand1ButtonCallback event))]))
 
 (define hit2 (new button% [parent player2Panel]
                          [label "Pedir"]
@@ -324,7 +373,7 @@
 (define stand2 (new button% [parent player2Panel]
                          [label "Plantarse"]
                          [callback (lambda (button event)
-                                     (threePButtonCallback event))]))
+                                     (stand2ButtonCallback event))]))
 
 (define hit3 (new button% [parent player3Panel]
                          [label "Pedir"]
@@ -334,7 +383,26 @@
 (define stand3 (new button% [parent player3Panel]
                          [label "Plantarse"]
                          [callback (lambda (button event)
-                                     (threePButtonCallback event))]))  
+                                     (stand3ButtonCallback event))]))  
+
+;****************************************************Llamadas de plantarse**************************************************************************************
+
+(define (stand1ButtonCallback event)
+  (set! tempA Anum1)
+  (set! Anum1 0)
+  (set! tempId 1)
+  (sumA 1))
+(define (stand2ButtonCallback event)
+  (set! tempA Anum2)
+  (set! Anum2 0)
+  (set! tempId 2)
+  (sumA 2))
+(define (stand3ButtonCallback event)
+  (set! tempA Anum3)
+  (set! Anum3 0)
+  (set! tempId 3)
+  (sumA 3))
+
 
 (define (test event)
   (newline)
