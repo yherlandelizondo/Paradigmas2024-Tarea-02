@@ -199,7 +199,8 @@
 (define (dealerUpdate) ;funcion para ejecutar la logica del dealer
   (set! dealerDeck (cons (car randomDeck) dealerDeck)) ;modificando la baraja del dealer
   (set! dealerScore (+ dealerScore (scoreSelector (car randomDeck) dealerScore))) ;modificando el puntaje del dealer, utilizando la funcion que elige los puntajes correspondientes en la logica
-  (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada
+  (set! randomDeck (cdr randomDeck)) ;quitando del deck principal la carta ya asignada\
+  (set! dealerStand (dealerMove dealerScore))
   (send upperPanel refresh) ; Refrescar el canvas
   (printAux)
 )
@@ -222,18 +223,21 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; logic: tratamiento de As ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (sumA id)
-
+  ;Se verifica si el jugador que se plantó posee algún A 
+  ;Si no posee ningún As entonces se suma el puntaje actual de los As a el puntaje del id correspondiente
   (cond((equal? tempA 0)(begin (totalA tempId)(checkStand)))
+       ;Para cada iteración se decrementa la cantidad de As que tiene el jugador y se muestra la ventana
+       ;al jugador para que seleccione el valor que le desea dar a su carta Ai
        ((equal? id 0)(begin (set! tempA (- tempA 1))(send aWindow show #t)))
        ((equal? id 1)(begin (set! tempA (- tempA 1))(send aWindow show #t)))
        ((equal? id 2)(begin (set! tempA (- tempA 1))(send aWindow show #t)))
        (else(begin (set! tempA (- tempA 1))(send aWindow show #t)))))
-
+;Una vez que el usuario seleccionó los valores de sus cartas As 
 (define (totalA id)
-  (cond((equal? id 0)(set! dealerScore (+ dealerScore valA)))
-       ((equal? id 1)(set! player1Score (+ player1Score valA)))
-       ((equal? id 2)(set! player2Score (+ player2Score valA)))
-       (else(set! player3Score (+ player3Score valA)))
+  (cond((equal? id 0)(begin (set! dealerScore (+ dealerScore valA)) (set! valA 0)))
+       ((equal? id 1)(begin (set! player1Score (+ player1Score valA)) (set! valA 0)))
+       ((equal? id 2)(begin (set! player2Score (+ player2Score valA)) (set! valA 0)))
+       (else(begin (set! player3Score (+ player3Score valA)) (set! valA 0)))
   )
   )
 

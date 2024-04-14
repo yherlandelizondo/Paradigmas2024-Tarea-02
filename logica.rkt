@@ -28,4 +28,10 @@
     )
 )
 
-(provide startDealerScore scoreSelector dealerMove) ;haciendo provide de manera que se pueda acceder a estas funciones desde la interfaz
+(define (longitud list);La función longitud se encarga de  devolver la longitud de una lista
+  (cond ((null? list)0)
+  (else (+ 1 (longitud (cdr list))))))
+
+
+
+(provide startDealerScore scoreSelector dealerMove longitud) ;haciendo provide de manera que se pueda acceder a estas funciones desde la interfaz
