@@ -1,7 +1,7 @@
 ;Tarea 2
 ;Yherland Elizondo Cordero
 ;Gabriela Quesada Sancho
-;Jafet Dixon Solano
+
 
 #lang racket
 (require racket/gui/base)
