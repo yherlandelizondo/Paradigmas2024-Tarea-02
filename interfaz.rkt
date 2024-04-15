@@ -25,7 +25,7 @@
 (define player2Score 0)
 (define player3Score 0)
 (define msg1 0)
-(define msg2 0)
+(define msg2 25)
 (define winner1 0)
 
 
@@ -173,10 +173,12 @@
        (else(begin (set! player3Score 0) (send winner2Message set-label (format "¡¡El segundo lugar es el jugador número ~a!!" 3))))))
 
 ;***********************************************************Funcion para determinar los puestos del podio***********************************************
-(define (gameOver dScore p1Score p2Score p3Score lond lon1 lon2 lon3)
+(define (gameOver dScore p1Score p2Score p3Score lond lon1 lon2 lon3) ;Funcion utilizada para obtener el primer y segundo lugar de la partida
   (smallDeck dScore p1Score p2Score p3Score lond lon1 lon2 lon3)
   (rmvIllegal winner1)
-  (send winnerWindow show #t))
+  (send winnerWindow show #t)
+  ;(send mainWindow show #f)
+  )
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Winner Window;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -375,14 +377,14 @@
                                      (elevenAButtonCallback event))]))
 
 (define (oneAButtonCallback event)
-  (set! valA (+ valA 1))
+  (set! valA (+ valA 1)) ;Se suma 1 al incremento de los As
   (send aWindow show #f)
-  (sumA tempId))
+  (sumA tempId));Se debe verificar si aún queda As que sumar para ello se busca en el respectivo id
 
 (define (elevenAButtonCallback event)
-  (set! valA (+ valA 11))
+  (set! valA (+ valA 11));Se suma 11 al incremento de los As
   (send aWindow show #f)
-  (sumA tempId))
+  (sumA tempId));Se debe verificar si aún queda As que sumar para ello se busca en el respectivo id
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: Verificación del puntaje total;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -394,8 +396,8 @@
                                     (incA id) 0))
         (else character))) ;cualquier numero asigna su mismo valor
 
-(define (incA id)
-  (cond((equal? id 0)(set! Anumd (+ Anumd 1)))
+(define (incA id);Se almacena en variables la cantidad de As que tiene cada jugador
+  (cond((equal? id 0)(set! Anumd (+ Anumd 1)));Si el id coincide se suma al contador de As de su jugador correspondiente
        ((equal? id 1)(set! Anum1 (+ Anum1 1)))
        ((equal? id 2)(set! Anum2 (+ Anum2 1)))
        (else(set! Anum3 (+ Anum3 1)))))
