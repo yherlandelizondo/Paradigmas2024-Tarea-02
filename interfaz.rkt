@@ -24,6 +24,10 @@
 (define player1Score 0)
 (define player2Score 0)
 (define player3Score 0)
+(define msg1 0)
+(define msg2 0)
+(define winner1 0)
+
 
 ;;;;;;;variable booleana para controlar el flujo;;;;;;;
 (define dealerPlaying 0) ;sin esta variable, si el juego planta a alguien se encicla el programa
@@ -124,7 +128,95 @@
   (send selecWindow show #f)) ;se desactiva la ventana de seleccion de jugador
 
 
+
+;***********************************************************Verificar si es mayor a 21*************************************************************************
+(define(rmvIllegal idWinner1); La función se utiliza para verificar si algún jugador posee un puntaje mayor a 21 ya que perdería el juego
+  ;Se identifica el id de los jugadores que perdieron por tener un puntaje mayor a 21 y se colocan sus valores en 0, además se identifica
+  ;y se excluye el ganador ya que este se presenta al verificar el JackBlack
+    (cond ((or (> dealerScore 21) (equal? 0 idWinner1))(begin (set! dealerScore 0))))
+    (cond ((or (> player1Score 21) (equal? 1 idWinner1))(begin (set! player1Score 0))))
+    (cond ((or (> player2Score 21) (equal? 2 idWinner1))(begin (set! player2Score 0))))
+    (cond ((or (> player3Score 21) (equal? 3 idWinner1))(begin (set! player3Score 0))))
+    (winner dealerScore player1Score player2Score player3Score));Se envían todos los puntaje a la función winner la cuál calcula el podio
+
+;****************************************************************Gana el 21 con menos cartas*******************************************************************
+;Para poder verificar si un jugador tiene el BlackJack se debe verificar todos los masos
+(define(smallDeck ptd pt1 pt2 pt3 ld l1 l2 l3)
+  (cond((not (= 21 ptd))(smallDeck1 ptd pt1 pt2 pt3 7 l1 l2 l3))
+       (else(smallDeck1 ptd pt1 pt2 pt3 ld l1 l2 l3))));si el puntaje no es 21 se descarta ya que no es posible que sea el BlackJack
+(define(smallDeck1 ptd pt1 pt2 pt3 ld l1 l2 l3);Se verifican los 4 puntajes en forma de cascada 
+  (cond((not (= 21 pt1))(smallDeck2 ptd pt1 pt2 pt3 ld 7 l2 l3))
+       (else (smallDeck2 ptd pt1 pt2 pt3 ld l1 l2 l3))))
+(define(smallDeck2 ptd pt1 pt2 pt3 ld l1 l2 l3)
+  (cond((not (= 21 pt2))(smallDeck3 ptd pt1 pt2 pt3 ld l1 7 l3))
+       (else (smallDeck3 ptd pt1 pt2 pt3 ld l1 l2 l3))))
+(define(smallDeck3 ptd pt1 pt2 pt3 ld l1 l2 l3)
+  (cond((not (= 21 pt3))(smallWinner ptd pt1 pt2 pt3 ld l1 l2 7))
+  (else (smallWinner ptd pt1 pt2 pt3 ld l1 l2 l3))))
+
+;Se tomaron las barajas de todos los jugadores que tengan 21 y el que posea el BlackJack o el menor número de cartas será el ganador 
+(define (smallWinner ptd pt1 pt2 pt3 ld l1 l2 l3)
+  ;Para que cumpla los requisitos tiene que tener la baraja con menor logitud y no haberse descartado en smallDeck
+  (cond((and (equal? (min ld l1 l2 l3) ld) (not(equal? ld 7)))(begin (set! winner1 0) (set! dealerScore 0)(send winner1Message set-label (format "¡¡El ganador es el dealer!!"))))
+       ((and (equal? (min ld l1 l2 l3) l1) (not(equal? l1 7)))(begin (set! winner1 1) (set! player1Score 0)(send winner1Message set-label (format "¡¡El ganador es el jugador número ~a!!"1))))
+       ((and (equal? (min ld l1 l2 l3) l2) (not(equal? l2 7)))(begin (set! winner1 2) (set! player2Score 0)(send winner1Message set-label (format "¡¡El ganador es el jugador número ~a!!"2))))
+       ((and (equal? (min ld l1 l2 l3) l3) (not(equal? l3 7)))(begin (set! winner1 3) (set! player3Score 0)(send winner1Message set-label (format "¡¡El ganador es el jugador número ~a!!"3))))))
+
+;***********************************************************Función pa ver quien ganó**************************************************************************
+;Esta función obtiene solamente los puntajes que cumplen con las condiciones para ganar 
+(define (winner scoreD score1 score2 score3)
+  ;Para cada jugador se verifica si tiene el puntaje más alto, además se cambia el valor del puntaje de ese jugador para
+  ;que no interfiera con las demás posiciones, se porporciona el id del jugador ganador
+  (cond((equal? (max scoreD score1 score2 score3) scoreD)(begin (set! dealerScore 0) (send winner2Message set-label (format "¡¡El segundo lugar es el dealer!!"))))
+       ((equal? (max scoreD score1 score2 score3) score1)(begin (set! player1Score 0) (send winner2Message set-label (format "¡¡El segundo lugar es el jugador número ~a!!" 1))))
+       ((equal? (max scoreD score1 score2 score3) score2)(begin (set! player2Score 0) (send winner2Message set-label (format "¡¡El segundo lugar es el jugador número ~a!!" 2))))
+       (else(begin (set! player3Score 0) (send winner2Message set-label (format "¡¡El segundo lugar es el jugador número ~a!!" 3))))))
+
+;***********************************************************Funcion para determinar los puestos del podio***********************************************
+(define (gameOver dScore p1Score p2Score p3Score lond lon1 lon2 lon3)
+  (smallDeck dScore p1Score p2Score p3Score lond lon1 lon2 lon3)
+  (rmvIllegal winner1)
+  (send winnerWindow show #t))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;Winner Window;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define winnerWindow (new frame% [label "¡¡Ganador!!"]
+                        [width 550]
+                        [height 300]))
+
+(define winnerPanel (new horizontal-panel% [parent winnerWindow]))
+(define leftwinnerPanel (new vertical-panel% [parent winnerPanel]
+                       [min-width 150]
+                       [min-height 300]
+                       ))
+
+(define fin1 (new message% [parent leftwinnerPanel]
+                           [label " "]))
+
+(define fin2 (new message% [parent leftwinnerPanel]
+                           [label " "]))
+
+(define fin3 (new message% [parent leftwinnerPanel]
+                           [label " "]))
+(define winner1Message (new message% [parent leftwinnerPanel]
+;Para el primer lugar se muestra el ganador utilizando la verificación del JackBlack 
+                           [label (format "¡¡El ganador es el jugador número ~a!!" msg1)]))
+(define winner2Message (new message% [parent leftwinnerPanel]
+;Para el segundo y tercer lugar se verifica de forma normal
+                            [label (format "¡¡En segundo lugar está el jugador número ~a!!" msg2)]))
+(define fin4 (new message% [parent leftwinnerPanel]
+                           [label " "]))
+
+(define fin5 (new message% [parent leftwinnerPanel]
+                           [label " "]))
+(define fin6 (new message% [parent leftwinnerPanel]
+                           [label " "]))
+
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;logic: creacion de las 4 decks iniciales;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define (initializeDecks); uso de el contador de control para asignar 2 cartas a cada jugador, se llama recursivamente con apoyo de deckAuxiliar
   (cond ((< cont 3) (deckAuxiliar (cons (car randomDeck) dealerDeck)))
         ((< cont 5) (deckAuxiliar (cons (car randomDeck) player1Deck)))
@@ -179,7 +271,7 @@
 
 (define (dealerTurn)
   (cond 
-    ((= dealerStand 1) (displayln "juego terminado")) ;si el dealer se planta significa que la partida termino
+    ((= dealerStand 1) (gameOver dealerScore player1Score player2Score player3Score (longitud dealerDeck) (longitud player1Deck) (longitud player2Deck) (longitud player3Deck))) ;si el dealer se planta significa que la partida termino
     (else ;primero se debe añadir la carta al deck (realizar la jugada como tal), luego se debe llamar recursivamente a dealerTurn para ver si se juega de nuevo
       (begin
        (set! dealerStand (dealerMove dealerScore))
